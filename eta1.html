@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <title>ETA 1 – Estação de Tratamento</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: linear-gradient(to right, #3498db, #2ecc71);
+      color: white;
+      margin: 0;
+      padding: 20px;
+    }
+    h1 {
+      text-align: center;
+      margin-bottom: 10px;
+    }
+    .btn-voltar {
+      display: inline-block;
+      margin: 10px 0 30px 0;
+      background: white;
+      color: #2c3e50;
+      padding: 10px 20px;
+      border-radius: 8px;
+      font-weight: bold;
+      text-decoration: none;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+    }
+    .linha {
+      display: flex;
+      flex-wrap: nowrap;
+      align-items: center;
+      justify-content: center;
+      gap: 16px;
+      margin-bottom: 30px;
+    }
+    .card {
+      background: white;
+      color: #2c3e50;
+      padding: 16px;
+      border-radius: 10px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+      text-align: center;
+      width: 240px;
+      min-height: 180px;
+      flex-shrink: 0;
+    }
+    .title {
+      font-size: 16px;
+      margin-bottom: 10px;
+      color: #34495e;
+    }
+    .tank {
+      width: 60px;
+      height: 140px;
+      border: 3px solid #3498db;
+      border-radius: 10px;
+      position: relative;
+      background: #ecf0f1;
+      margin: 10px auto;
+      overflow: hidden;
+    }
+    .fill {
+      position: absolute;
+      bottom: 0;
+      width: 100%;
+      background: #3498db;
+      color: white;
+      text-align: center;
+      font-size: 12px;
+      line-height: 1.5;
+      transition: height 0.5s ease;
+    }
+    .bomba-status {
+      margin: 6px 0;
+    }
+    .bomba-label {
+      font-weight: bold;
+      font-size: 14px;
+    }
+    .bomba-indicador span {
+      display: inline-block;
+      min-width: 80px;
+      padding: 4px 8px;
+      margin: 4px 2px;
+      border-radius: 6px;
+      font-weight: bold;
+      font-size: 12px;
+      text-align: center;
+    }
+    .indicador.on {
+      background-color: #2ecc71;
+      color: white;
+    }
+    .indicador.off {
+      background-color: #e74c3c;
+      color: white;
+    }
+    .sobrecarga.sim {
+      background-color: #f1c40f;
+      color: #2c3e50;
+    }
+    .sobrecarga.nao {
+      background-color: #bdc3c7;
+      color: #2c3e50;
+    }
+    .seta {
+      font-size: 32px;
+      align-self: center;
+      color: white;
+    }
+    .grafico-container {
+      background: white;
+      color: #2c3e50;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+      text-align: center;
+      max-width: 1000px;
+      margin: 0 auto 40px auto;
+    }
+    .filtros-paralelo {
+      display: flex;
+      justify-content: space-around;
+      align-items: flex-end;
+      height: 100px;
+      margin-top: 10px;
+    }
+    .filtro {
+      width: 30px;
+      height: 80px;
+      background-color: #95a5a6;
+      border-radius: 6px;
+      box-shadow: inset 0 0 5px rgba(0,0,0,0.2);
+    }
+    .filtro-vertical {
+    width: 40px;
+    height: 100px;
+    background-color: #2ecc71;
+    margin: 0 auto;
+    border-radius: 8px;
+    box-shadow: inset 0 0 6px rgba(0,0,0,0.2);
+  }
+    #graficoETA1 {
+      width: 100%;
+      height: 300px !important;
+    }
+  </style>
+</head>
+<body>
+  <h1>🚰 ETA 1 – Estação de Tratamento</h1>
+  <div style="text-align: center;">
+    <a href="boasvindas.html" class="btn-voltar">⬅ Voltar ao Menu</a>
+  </div>
+
+  <!-- Início das linhas horizontais -->
+  <div class="linha">
+    <div class="card">
+      <div class="title">Reservatório de Entrada</div>
+      <div class="tank"><div id="fillEntrada" class="fill">0%</div></div>
+      <p>Nível: <span id="nivelEntrada">--</span>%</p>
+    </div>
+
+    <div class="seta">➡️</div>
+
+    <div class="card">
+      <div class="title">Bombas de Recalque</div>
+      <div class="bomba-status">
+        <div class="bomba-label">Bomba 1</div>
+        <div class="bomba-indicador">
+          <span id="bomba1" class="indicador">--</span>
+          <span id="sobrecarga1" class="sobrecarga">--</span>
+        </div>
+      </div>
+      <div class="bomba-status">
+        <div class="bomba-label">Bomba 2</div>
+        <div class="bomba-indicador">
+          <span id="bomba2" class="indicador">--</span>
+          <span id="sobrecarga2" class="sobrecarga">--</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="seta">➡️</div>
+
+    <div class="card">
+      <div class="title">Filtros de Zeólita</div>
+      <div class="filtros-paralelo">
+        <div class="filtro"></div>
+        <div class="filtro"></div>
+        <div class="filtro"></div>
+        <div class="filtro"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="linha">
+    <div class="seta">➡️</div>
+  <div class="card">
+  <div class="title">Filtro Vertical</div>
+  <div class="filtro-vertical"></div>
+  <p>Status: Operacional</p>
+</div>
+    <div class="seta">➡️</div>
+
+    <div class="card">
+      <div class="title">Reservatório Filtrado</div>
+      <div class="tank"><div id="fillFiltrada" class="fill">0%</div></div>
+      <p>Nível: <span id="nivelFiltrada">--</span>%</p>
+    </div>
+
+    <div class="seta">➡️</div>
+
+    <div class="card">
+      <div class="title">Bombas de Recalque</div>
+      <div class="bomba-status">
+        <div class="bomba-label">Bomba 3</div>
+        <div class="bomba-indicador">
+          <span id="bomba3" class="indicador">--</span>
+          <span id="sobrecarga3" class="sobrecarga">--</span>
+        </div>
+      </div>
+      <div class="bomba-status">
+        <div class="bomba-label">Bomba 4</div>
+        <div class="bomba-indicador">
+          <span id="bomba4" class="indicador">--</span>
+          <span id="sobrecarga4" class="sobrecarga">--</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="linha">
+    <div class="card">
+      <div class="title">Filtros de Resina</div>
+      <div class="filtros-paralelo">
+        <div class="filtro"></div>
+        <div class="filtro"></div>
+        <div class="filtro"></div>
+        <div class="filtro"></div>
+      </div>
+    </div>
+
+    <div class="seta">➡️</div>
+
+    <div class="card">
+      <div class="title">Reservatórios Potáveis</div>
+      <p>Potável 1: <span id="nivelP1">--</span>%</p>
+      <p>Potável 2: <span id="nivelP2">--</span>%</p>
+      <p>Potável 3: <span id="nivelP3">--</span>%</p>
+    </div>
+
+    <div class="card">
+      <div class="title">Qualidade da Água</div>
+      <p>Cloro: <span id="cloro">--</span> mg/L</p>
+      <p>pH: <span id="ph">--</span></p>
+    </div>
+
+    <div class="card">
+      <div class="title">Produção</div>
+      <p>Vazão: <span id="vazao">--</span> m³/h</p>
+      <p>Dia: <span id="producao">--</span> m³</p>
+    </div>
+  </div>
+
+  <div class="grafico-container">
+    <div class="title">📊 Produção dos Últimos 7 Dias</div>
+    <canvas id="graficoETA1"></canvas>
+  </div>
+
+  <script>
+    const ctx = document.getElementById('graficoETA1').getContext('2d');
+    new Chart(ctx, {
+      type: 'bar',
+      data: {
+        labels: ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'],
+        datasets: [{
+          label: 'Produção (m³)',
+          data: [110, 125, 140, 130, 150, 160, 145],
+          backgroundColor: '#2ecc71'
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        scales: {
+          y: { beginAtZero: true }
+        }
+      }
+    });
+
+    setInterval(() => {
+      const ligado = () => Math.random() > 0.3;
+      const sobrecarga = () => Math.random() < 0.1;
+
+      for (let i = 1; i <= 4; i++) {
+        const statusLigado = ligado();
+        const statusSobrecarga = statusLigado && sobrecarga();
+
+        const bombaEl = document.getElementById(`bomba${i}`);
+        const sobreEl = document.getElementById(`sobrecarga${i}`);
+
+        if (bombaEl && sobreEl) {
+          bombaEl.textContent = statusLigado ? "Ligada" : "Desligada";
+          bombaEl.className = "indicador " + (statusLigado ? "on" : "off");
+
+          sobreEl.textContent = statusSobrecarga ? "Sobrecarga" : "Normal";
+          sobreEl.className = "sobrecarga " + (statusSobrecarga ? "sim" : "nao");
+        }
+      }
+
+      const nivel = () => Math.floor(Math.random() * 100);
+      const setNivel = (id, fillId, valor) => {
+        const el = document.getElementById(id);
+        const fill = document.getElementById(fillId);
+        if (el && fill) {
+          el.textContent = valor;
+          fill.style.height = valor + "%";
+          fill.textContent = valor + "%";
+        }
+      };
+
+      setNivel("nivelEntrada", "fillEntrada", nivel());
+      setNivel("nivelFiltrada", "fillFiltrada", nivel());
+
+      ["nivelP1", "nivelP2", "nivelP3"].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.textContent = nivel();
+      });
+
+      const cloro = (0.8 + Math.random() * 0.5).toFixed(2);
+      const ph = (6.8 + Math.random() * 0.6).toFixed(2);
+      document.getElementById("cloro").textContent = cloro;
+      document.getElementById("ph").textContent = ph;
+
+      const vazao = ligado() ? (10 + Math.random() * 5) : 0;
+      const producao = vazao * 2;
+      document.getElementById("vazao").textContent = vazao.toFixed(2);
+      document.getElementById("producao").textContent = producao.toFixed(1);
+    }, 3000);
+  </script>
+</body>
+</html>
